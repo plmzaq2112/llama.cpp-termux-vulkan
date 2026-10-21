@@ -1,0 +1,18 @@
+diff --git a/ggml/src/ggml-vulkan/ggml-vulkan-buffers.cpp b/ggml/src/ggml-vulkan/ggml-vulkan-buffers.cpp
+index b687b13..705c11e 100644
+--- a/ggml/src/ggml-vulkan/ggml-vulkan-buffers.cpp
++++ b/ggml/src/ggml-vulkan/ggml-vulkan-buffers.cpp
+@@ -8,6 +8,13 @@
+ static void * portable_aligned_malloc(size_t align, size_t size) {
+ #ifdef _WIN32
+     return _aligned_malloc(size, align);
++#elif defined(__ANDROID__)
++    // Bionic only exposes aligned_alloc from API 29; Termux targets API 24
++    void * ptr = nullptr;
++    if (posix_memalign(&ptr, align, size) != 0) {
++        return nullptr;
++    }
++    return ptr;
+ #else
+     return std::aligned_alloc(align, size);
+ #endif
